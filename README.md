@@ -1,17 +1,37 @@
 # cisc450_project1
 
-Due Date: 	April 5th, 2021
+Due Date: 	May 7th, 2021
 Creators:	Casey Rock & Malachi Parks
 Section:	CISC450-010
-Assignment:	Programming Assignment 1
+Assignment:	Programming Assignment 2
 
 
 **Assignment Details:**
 
 We were tasked with implementing a client and server model which will utilize
-TCP to transmit a file. This file will be moved from the server to the client.
+UDP to transmit a file. This file will be moved from the server to the client.
 In this assignment we are allowed to choose any port number that will not conflict
-with exisiting port numbers or ports numbers used by our peers.
+with exisiting port numbers or ports numbers used by our peers. Additionally, UDP will
+be built with reliable data transfer with sequence numbers + ack numbers.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 **Steps For Assignment:**
 
