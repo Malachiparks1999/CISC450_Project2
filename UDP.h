@@ -12,6 +12,7 @@ File Description: Used as the .h file in the TCPClient.c and TCPServer.c file in
 #include <netdb.h>
 #include <netinet/in.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include <string.h>
 #include <sys/socket.h>
 #include <sys/types.h>
@@ -19,6 +20,7 @@ File Description: Used as the .h file in the TCPClient.c and TCPServer.c file in
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <unistd.h>
+
 
 
 #define MESSMAX 80	//Max length of a message including newline char

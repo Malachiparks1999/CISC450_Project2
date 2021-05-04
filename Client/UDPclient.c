@@ -13,6 +13,7 @@ File Description: UDP server
 
 int main(int argc, char const * argv[]){
     struct sockaddr_in serverAddr;
+    socklen_t serverAddrLen = sizeof(serverAddr);
     int clientSocketID ;
     char filename[MAX_FILE_NAME];
     struct packet recvPacket;
@@ -39,17 +40,13 @@ int main(int argc, char const * argv[]){
 
     serverAddr.sin_family = AF_INET ;  // Obtaining IP Address, ensuring in IPv4 family
     serverAddr.sin_port = htons(PORT); //Changing to host byte order to network byte order
-
-    //Ensure the IP address is IPV4
-    if(inet_pton(AF_INET, "127.0.0.1", &serverAddr.sin_addr)<=0) {
-        printf("\nInvalid address/ Address not supported \n");
-        return -1;
-    }
+    serverAddr.sin_addr.s_addr = INADDR_ANY ;
     
 
    // If client cannot send to server kick back error
    //sendT0
-   if(send(clientSocketID , filename , len , 0 ) < 0){
+   if(sendto(clientSocketID , filename , len , 0 ,
+                (struct sockaddr * )  &serverAddr, serverAddrLen) < 0){
         perror("Client Send Failed");
         exit(EXIT_FAILURE);
    };
@@ -57,8 +54,9 @@ int main(int argc, char const * argv[]){
    // While end connection is not 0, recieve info from server
    while(endConnections){
        //recvFrom
-        if(recv(clientSocketID,&recvPacket, MAX_FILE_NAME, 0 ) < 0){
-            perror("Server Accept Failed");
+        if(recvfrom(clientSocketID,&recvPacket, MAX_FILE_NAME, 0,
+                    (struct sockaddr *) &serverAddr, &serverAddrLen) < 0){
+            perror("Client RecvFrom Failed");
             exit(EXIT_FAILURE);
         }
 
@@ -72,8 +70,9 @@ int main(int argc, char const * argv[]){
 
         //wait for server to send whole file 
         //sendTO
-        if(send(clientSocketID , ackStr , strlen(ackStr) , 0 ) < 0){
-            perror("Client Send Failed");
+        if(sendto(clientSocketID , filename , len , 0 ,
+                (struct sockaddr * )  &serverAddr, serverAddrLen) < 0){
+            perror("Client SendTo ACK Failed");
             exit(EXIT_FAILURE);
         };
 
@@ -82,19 +81,21 @@ int main(int argc, char const * argv[]){
             endConnections = 0;
             break;
         }
+
+        
    } 
 
-   // Recieve end of file, break immediatly
-   //RecvFrom
-   if(recv(clientSocketID,&endFile, MAX_FILE_NAME, 0 ) < 0){
-            perror("Server Accept Failed");
-            exit(EXIT_FAILURE);
-    }
+//    // Recieve end of file, break immediatly
+//    //RecvFrom
+//    if(recv(clientSocketID,&endFile, MAX_FILE_NAME, 0 ) < 0){
+//             perror("Server Accept Failed");
+//             exit(EXIT_FAILURE);
+//     }
 
-    printf("End of Transmission Packet with sequence number %d received with %d data bytes\n", recvPacket.pktSequenceNumber, recvPacket.count);
+//     printf("End of Transmission Packet with sequence number %d received with %d data bytes\n", recvPacket.pktSequenceNumber, recvPacket.count);
 
-    printf("\nNumber of data packets received: %d \n", recvPacket.pktSequenceNumber);
-    printf("Total number of data bytes received: %d \n", totalBytes);
+//     printf("\nNumber of data packets received: %d \n", recvPacket.pktSequenceNumber);
+//     printf("Total number of data bytes received: %d \n", totalBytes);
    
 
     //close connection between server and host

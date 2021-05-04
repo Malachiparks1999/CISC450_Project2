@@ -12,9 +12,11 @@ File Description: UDP server
 
 
 int main(int argc, char const * argv[]){
-    struct sockaddr_in serverAddr ;
+    struct sockaddr_in serverAddr, clientAddr ;
+    socklen_t clientAddrLen = sizeof(clientAddr); 
     int serverSocketID ;
-    int objectSockerID;
+    
+
     char recvBuff[MAX_FILE_NAME];
     char filepath[MAX_FILE_NAME]= "./Server/" ;
     FILE *fp ;
@@ -24,6 +26,7 @@ int main(int argc, char const * argv[]){
     int sequenceNumberCount = 0;
     int totalBytes = 0;
     char ack[MESSMAX];
+    int recvMesgSize;
     
     
     
@@ -34,10 +37,14 @@ int main(int argc, char const * argv[]){
         perror("Server Socket Failed");
         exit(EXIT_FAILURE);
     }
+
+    memset(&serverAddr, 0, sizeof(serverAddr));
+    memset(&clientAddr, 0, sizeof(clientAddr));
  
     serverAddr.sin_family = AF_INET ;  // IPv4 Family
     serverAddr.sin_addr.s_addr = INADDR_ANY; // Make sure it can take any IPv4 address
     serverAddr.sin_port = htons(PORT); // Change for network byte order to host byte order
+    
   
     // Bind a socket to server
     if(bind(serverSocketID, (struct sockaddr * ) &serverAddr, sizeof(serverAddr)) < 0){
@@ -45,11 +52,11 @@ int main(int argc, char const * argv[]){
         exit(EXIT_FAILURE);
     }
 
-
     // File name recieved 0 then kill connection
     // recvFrom Server
-    if(recv(objectSockerID,recvBuff, MAX_FILE_NAME, 0 ) < 0){
-        perror("Server Accept Failed");
+    if(recvfrom(serverSocketID,recvBuff, MAX_FILE_NAME, 0,
+                            (struct sockaddr * ) &clientAddr, &clientAddrLen) < 0){
+        perror("Server Recvfrom Failed");
         exit(EXIT_FAILURE);
     }
 
@@ -61,7 +68,8 @@ int main(int argc, char const * argv[]){
         perror("Failed to open");
         exit(EXIT_FAILURE);
     };
-    
+   
+    printf("%s\n", filepath);
     //clear buffer of received file
     memset(recvBuff, 0, sizeof recvBuff);
 
@@ -69,24 +77,26 @@ int main(int argc, char const * argv[]){
         while(fread(sendPacket.data, MESSMAX, 1, fp)){
             sequenceNumberCount++;
             sendPacket.pktSequenceNumber = sequenceNumberCount; // this needs to be a VAR 
-            sendPacket.count = sizeof sendPacket.data + 4; 
+            sendPacket.count = sizeof(sendPacket.data) + 4; 
             totalBytes += sendPacket.count ;
-            
-	    // Send packet to client
+
+	        // Send packet to client
             printf("Packet: %d transmitted with %d data bytes \n", sendPacket.pktSequenceNumber, sendPacket.count);
-            //sendTo
-            if(send(objectSockerID , &sendPacket, sendPacket.count, 0) < 0 ){
+            if(sendto(serverSocketID, &sendPacket,sendPacket.count , 0,
+                        (struct sockaddr * ) &clientAddr, clientAddrLen) < 0 ){
                 perror("Server Send Failed");
                 exit(EXIT_FAILURE);
             };
 
 	        // Ensuring packet recieved, ack same information to Server console
-            //recvFrom 
-            if(recv(objectSockerID, ack , MAX_FILE_NAME, 0 ) < 0){
-                perror("Server ack Failed");
+            // recvFrom 
+             if(recvfrom(serverSocketID,recvBuff, MAX_FILE_NAME, 0,
+                            (struct sockaddr * ) &clientAddr, &clientAddrLen) < 0){
+                perror("Server Recvfrom ACK Failed");
                 exit(EXIT_FAILURE);
             }
 
+            printf("%s\n", recvBuff);
             // Clear buffer in case
             memset(sendPacket.data, 0, sizeof sendPacket.data);
         }
@@ -94,25 +104,24 @@ int main(int argc, char const * argv[]){
         printf("File does not exist");
     }
 
-    // Final send of information in pkt
-    sequenceNumberCount++;
-    sendPacket.pktSequenceNumber = sequenceNumberCount; // this needs to be a VAR 
-    sendPacket.count = 0; 
-    totalBytes += sendPacket.count ;
+    // // Final send of information in pkt
+    // sequenceNumberCount++;
+    // sendPacket.pktSequenceNumber = sequenceNumberCount; // this needs to be a VAR 
+    // sendPacket.count = 0; 
+    // totalBytes += sendPacket.count ;
     
-    //sendT0
-    if(send(objectSockerID ,&sendPacket, sizeof sendPacket.data + 4, 0) < 0 ){
-            perror("Server end of transission Send Failed");
-            exit(EXIT_FAILURE);
-    };
+    // //sendT0
+    // if(send(serverSocketID,&sendPacket, sizeof sendPacket.data + 4, 0) < 0 ){
+    //         perror("Server end of transission Send Failed");
+    //         exit(EXIT_FAILURE);
+    // };
 
-    printf("End of Transmission Packet with sequence number %d transmitted with %d data bytes \n\n", sequenceNumberCount, sendPacket.count);
+    // printf("End of Transmission Packet with sequence number %d transmitted with %d data bytes \n\n", sequenceNumberCount, sendPacket.count);
 
-    printf("Number of data packets transmitted: %d \n", sequenceNumberCount);
-    printf("Total number of data bytes transmitted: %d\n", totalBytes) ;
+    // printf("Number of data packets transmitted: %d \n", sequenceNumberCount);
+    // printf("Total number of data bytes transmitted: %d\n", totalBytes) ;
     
     fclose(fp); // close file
-    close(objectSockerID); // close object socket ID
     close(serverSocketID); // close Server connection
 
 
