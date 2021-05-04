@@ -1,8 +1,8 @@
 /*
-Due Date:       April 5th, 2021
+Due Date:       May 7th, 2021
 Creators:       Casey Rock & Malachi Parks
 Section:        CISC450-010
-Assignment:     Programming Assignment 1
+Assignment:     Programming Assignment 2
 
 File Description: UDP server 
 */
