@@ -23,7 +23,7 @@ int main(int argc, char const * argv[]){
     struct packet final ;
     int sequenceNumberCount = 0;
     int totalBytes = 0;
-    char echo[MESSMAX];
+    char ack[MESSMAX];
     
     
     
@@ -47,7 +47,7 @@ int main(int argc, char const * argv[]){
 
 
     // File name recieved 0 then kill connection
-    // recvFrom 
+    // recvFrom Server
     if(recv(objectSockerID,recvBuff, MAX_FILE_NAME, 0 ) < 0){
         perror("Server Accept Failed");
         exit(EXIT_FAILURE);
@@ -80,10 +80,10 @@ int main(int argc, char const * argv[]){
                 exit(EXIT_FAILURE);
             };
 
-	    // Ensuring packet recieved, echo same information to Server console
+	        // Ensuring packet recieved, ack same information to Server console
             //recvFrom 
-            if(recv(objectSockerID, echo , MAX_FILE_NAME, 0 ) < 0){
-                perror("Server Echo Failed");
+            if(recv(objectSockerID, ack , MAX_FILE_NAME, 0 ) < 0){
+                perror("Server ack Failed");
                 exit(EXIT_FAILURE);
             }
 

@@ -21,7 +21,7 @@ int main(int argc, char const * argv[]){
     int len;
     int fd ;
     int endConnections = 1;
-    const char echoStr[] = "Echo";
+    const char ackStr[] = "ACK";
     int totalBytes = 0;
 
     //Name of file client wants server to transmit back
@@ -72,7 +72,7 @@ int main(int argc, char const * argv[]){
 
         //wait for server to send whole file 
         //sendTO
-        if(send(clientSocketID , echoStr , strlen(echoStr) , 0 ) < 0){
+        if(send(clientSocketID , ackStr , strlen(ackStr) , 0 ) < 0){
             perror("Client Send Failed");
             exit(EXIT_FAILURE);
         };
