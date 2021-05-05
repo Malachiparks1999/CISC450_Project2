@@ -10,17 +10,17 @@ File Description: UDP server
 #include "../UDP.h"
 
 //Simulates packet loss where packet never reaches reciever
-int simulate_loss(double LossRate);
+int simulate_loss(double PKTLossRate);
 
-int simulate_loss(double LossRate){
+int simulate_loss(double PKTLossRate){
 	/*
-	Configured using the parameter ACK Loss Ratio. Causes 
-	the client not to transmit an ACK when a loss is indicated.
+	Configured using the parameter PKT Loss Ratio. Causes 
+	the client not to transmit an PKT when a loss is indicated.
 		Generate a uniformly distribute random number between 0 and 1
-		<  ACK LOSS RATIO return 1, else return 0
+		PotentioanLoss <  PKT LOSS RATIO return 1, else return 0
 	*/
 	double potentialLoss = rand()/(RAND_MAX + 1);	//Creates a random number between 0-1
-	if(potentialLoss < LossRate){
+	if(potentialLoss < PKTLossRate){
 		return 1;
 	else{
 		return 0;
