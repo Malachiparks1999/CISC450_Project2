@@ -21,10 +21,10 @@ int simulate_loss(double LossRate){
 	*/
 	double potentialLoss = rand()/(RAND_MAX + 1);	//Creates a random number between 0-1
 	if(potentialLoss < LossRate){
-		return 0;
-	else{
 		return 1;
-}
+	else{
+		return 0;
+}//simulate_loss
 
 int main(int argc, char const * argv[]){
     struct sockaddr_in serverAddr;
@@ -39,6 +39,20 @@ int main(int argc, char const * argv[]){
     int endConnections = 1;
     const char ackStr[] = "ACK";
     int totalBytes = 0;
+
+    //used for packet lost
+    int lostPkts = 0;
+    double packet_loss_rate;
+
+    // User inputs the packet lost rate
+    printf("Please enter the Packet Loss Rate. This number must between 0 and 1. Ex: .73\n");
+    scanf("%lf",&packet_loss_rate);
+    
+    /* cant get this to work correctly to ensure it's a float between the two values
+    while(packet_loss_rate >= 1 || packet_loss_rate =< 0){
+	printf("Entry invalid: Number was not between 0 and 1. Try Again\n");
+    }
+    */
 
     //Name of file client wants server to transmit back
     printf( "Enter a file name : ");
