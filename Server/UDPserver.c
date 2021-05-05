@@ -19,9 +19,10 @@ int simulate_ACK_loss(double ackLossRate){
 		Generate a uniformly distributed random num between 0 and 1
 		potentialLoss < ACKLossRate return 1, else return 0
 	*/
-	double potentialLoss = rand()/RAND_MAX + 1);
+	double potentialLoss = (rand()/RAND_MAX + 1.);
 	if(potentialLoss < ackLossRate){
 		return 1;
+    }
 	else{
 		return 0;
 	}

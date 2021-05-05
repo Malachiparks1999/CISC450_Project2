@@ -19,11 +19,13 @@ int simulate_loss(double PKTLossRate){
 		Generate a uniformly distribute random number between 0 and 1
 		PotentioanLoss <  PKT LOSS RATIO return 1, else return 0
 	*/
-	double potentialLoss = rand()/(RAND_MAX + 1);	//Creates a random number between 0-1
+	double potentialLoss = (rand()/(RAND_MAX + 1.));	//Creates a random number between 0-1
 	if(potentialLoss < PKTLossRate){
 		return 1;
+    }
 	else{
 		return 0;
+    }
 }//simulate_loss
 
 int main(int argc, char const * argv[]){
