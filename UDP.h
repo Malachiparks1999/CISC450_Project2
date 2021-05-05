@@ -1,10 +1,10 @@
 /*
-Due Date:       April 5th, 2021
+Due Date:       May 7th, 2021
 Creators:       Casey Rock & Malachi Parks
 Section:        CISC450-010
-Assignment:     Programming Assignment 1
+Assignment:     Programming Assignment 2
 
-File Description: Used as the .h file in the TCPClient.c and TCPServer.c file instead of all the seperate header files.
+File Description: Used as the .h file in the UDPClient.c and UDPServer.c file instead of all the seperate header files.
  Also allows the change of MESSMAX and PORT easily rather than hardcoding values into the .c files
 */
 

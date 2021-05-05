@@ -1,15 +1,32 @@
 /*
-Due Date:       April 5th, 2021
+Due Date:       May 7th, 2021
 Creators:       Casey Rock & Malachi Parks
 Section:        CISC450-010
-Assignment:     Programming Assignment 1
+Assignment:     Programming Assignment 2
 
 File Description: UDP server 
 */
 
 #include "../UDP.h"
 
+//Simulates packet loss where packet never reaches reciever
+int simulate_loss(double PKTLossRate);
 
+int simulate_loss(double PKTLossRate){
+	/*
+	Configured using the parameter PKT Loss Ratio. Causes 
+	the client not to transmit an PKT when a loss is indicated.
+		Generate a uniformly distribute random number between 0 and 1
+		PotentioanLoss <  PKT LOSS RATIO return 1, else return 0
+	*/
+	double potentialLoss = (rand()/(RAND_MAX + 1.));	//Creates a random number between 0-1
+	if(potentialLoss < PKTLossRate){
+		return 1;
+    }
+	else{
+		return 0;
+    }
+}//simulate_loss
 
 int main(int argc, char const * argv[]){
     struct sockaddr_in serverAddr;
@@ -24,6 +41,20 @@ int main(int argc, char const * argv[]){
     int endConnections = 1;
     const char ackStr[] = "ACK";
     int totalBytes = 0;
+
+    //used for packet lost
+    int lostPkts = 0;
+    double packet_loss_rate;
+
+    // User inputs the packet lost rate
+    printf("Please enter the Packet Loss Rate. This number must between 0 and 1. Ex: .73\n");
+    scanf("%lf",&packet_loss_rate);
+    
+    /* cant get this to work correctly to ensure it's a float between the two values
+    while(packet_loss_rate >= 1 || packet_loss_rate =< 0){
+	printf("Entry invalid: Number was not between 0 and 1. Try Again\n");
+    }
+    */
 
     //Name of file client wants server to transmit back
     printf( "Enter a file name : ");
