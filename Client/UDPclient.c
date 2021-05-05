@@ -9,7 +9,22 @@ File Description: UDP server
 
 #include "../UDP.h"
 
+//Simulates packet loss where packet never reaches reciever
+int simulate_loss(double LossRate);
 
+int simulate_loss(double LossRate){
+	/*
+	Configured using the parameter ACK Loss Ratio. Causes 
+	the client not to transmit an ACK when a loss is indicated.
+		Generate a uniformly distribute random number between 0 and 1
+		<  ACK LOSS RATIO return 1, else return 0
+	*/
+	double potentialLoss = rand()/(RAND_MAX + 1);	//Creates a random number between 0-1
+	if(potentialLoss < LossRate){
+		return 0;
+	else{
+		return 1;
+}
 
 int main(int argc, char const * argv[]){
     struct sockaddr_in serverAddr;
