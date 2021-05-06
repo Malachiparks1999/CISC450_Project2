@@ -20,6 +20,8 @@ File Description: Used as the .h file in the UDPClient.c and UDPServer.c file in
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <unistd.h>
+#include <time.h>
+#include <math.h>
 
 
 
@@ -37,6 +39,6 @@ struct packet {
         char data[MESSMAX];
 } ;
 
-struct ack {
+struct ack_packet{
         short sequenceNum;
 } ;

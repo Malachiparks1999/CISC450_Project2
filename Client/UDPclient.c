@@ -10,23 +10,23 @@ File Description: UDP server
 #include "../UDP.h"
 
 //Simulates packet loss where packet never reaches reciever
-int simulate_loss(double PKTLossRate);
+int simulate_ACK_loss(double ACKLossRate);
 
-int simulate_loss(double PKTLossRate){
+int simulate_ACK_loss(double ACKLossRate){
 	/*
 	Configured using the parameter PKT Loss Ratio. Causes 
 	the client not to transmit an PKT when a loss is indicated.
 		Generate a uniformly distribute random number between 0 and 1
 		PotentioanLoss <  PKT LOSS RATIO return 1, else return 0
 	*/
-	double potentialLoss = (rand()/(RAND_MAX + 1.));	//Creates a random number between 0-1
-	if(potentialLoss < PKTLossRate){
-		return 1;
+	double SuccessfulAck = ((double) rand() / (RAND_MAX));	//Creates a random number between 0-1
+	if(SuccessfulAck > ACKLossRate){
+		return 1; // transmit Ack
     }
 	else{
-		return 0;
+		return 0; // dron't transmit Ack
     }
-}//simulate_loss
+}//simulate_ACK_loss
 
 
 int main(int argc, char const * argv[]){
@@ -40,8 +40,12 @@ int main(int argc, char const * argv[]){
     int len;
     int fd ;
     int endConnections = 1;
-    const char ackStr[] = "ACK";
+    struct ack_packet ack;
+    int ackSize = sizeof(ack);
     int totalBytes = 0;
+
+    // Seeding random num generator for AckLoss
+    srand(time(NULL));
 
     //used for packet lost
     int lostPkts = 0;
@@ -101,11 +105,19 @@ int main(int argc, char const * argv[]){
 
         //wait for server to send whole file 
         //sendTO
-        if(sendto(clientSocketID , filename , len , 0 ,
+        if(sendto(clientSocketID , &ack , ackSize , 0 ,
                 (struct sockaddr * )  &serverAddr, serverAddrLen) < 0){
             perror("Client SendTo ACK Failed");
             exit(EXIT_FAILURE);
         };
+
+        
+
+        if(ack.sequenceNum == 0)
+            ack.sequenceNum = 1;
+        else
+            ack.sequenceNum = 0;
+        
 
 	// If the count of data is empty then break out of loop
         if(recvPacket.count == 0 ) {

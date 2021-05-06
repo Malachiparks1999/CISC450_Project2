@@ -10,31 +10,39 @@ File Description: UDP server
 #include "../UDP.h"
 
 //Used to simulate lost ack
-int simulate_ACK_loss(double ackLossRate);
+int simulate_loss(double packetLossRate);
 
-int simulate_ACK_loss(double ackLossRate){
+int simulate_loss(double packetLossRate){
 	/* Configured using the paramater ACK loss ratio. Causes the 
 	   Server not to transmit ack when loss is indicated. Client
 	   moves on as if nothing happens.
 		Generate a uniformly distributed random num between 0 and 1
-		potentialLoss < ACKLossRate return 1, else return 0
+		packetSuccessRate < packetLossRate return 1, else return 0
 	*/
-	double potentialLoss = (rand()/RAND_MAX + 1.);
-	if(potentialLoss < ackLossRate){
-		return 1;
+     
+	double packetSuccessRate = ((double) rand()  / (RAND_MAX));
+    printf("potential lost:%lf \n", packetSuccessRate) ;
+	if(packetSuccessRate > packetLossRate){
+		return 1; //transmit 
     }
 	else{
-		return 0;
+		return 0; // don't transmit
 	}
-}//simulate_ACK_loss
+}//simulate_loss
 
 int main(int argc, char const * argv[]){
     struct sockaddr_in serverAddr, clientAddr ;
+    struct ack_packet ack;
+    int ackSize = sizeof(ack);
+    ack.sequenceNum = 0;
     socklen_t clientAddrLen = sizeof(clientAddr); 
     int serverSocketID ;
+    srand(time(NULL));
     
 
+
     char recvBuff[MAX_FILE_NAME];
+    char ackNumber[1];
     char filepath[MAX_FILE_NAME]= "./Server/" ;
     FILE *fp ;
     char fileBuffer[MESSMAX];
@@ -42,7 +50,6 @@ int main(int argc, char const * argv[]){
     struct packet final ;
     int sequenceNumberCount = 0;
     int totalBytes = 0;
-    char ack[MESSMAX];
     int recvMesgSize;
     int timeoutSec;
     double packet_loss_ratio;
@@ -50,6 +57,7 @@ int main(int argc, char const * argv[]){
      //Name of file client wants server to transmit back
     printf( "Timeout:  ");
     fscanf(stdin, "%d", &timeoutSec);
+    timeoutSec = pow(10.0,timeoutSec);
     fflush(stdin);
     
     // User inputs the packet lost rate
@@ -104,24 +112,44 @@ int main(int argc, char const * argv[]){
             sendPacket.pktSequenceNumber = sequenceNumberCount; // this needs to be a VAR 
             sendPacket.count = sizeof(sendPacket.data) + 4; 
             totalBytes += sendPacket.count ;
+            
+            if(simulate_loss(packet_loss_ratio)){
+                printf("Packet: %d transmitted with %d data bytes \n", sendPacket.pktSequenceNumber, sendPacket.count);
+                if(sendto(serverSocketID, &sendPacket,sendPacket.count , 0,
+                            (struct sockaddr * ) &clientAddr, clientAddrLen) < 0 ){
+                    perror("Server Send Failed");
+                    exit(EXIT_FAILURE);
+                };
 
-	        // Send packet to client
-            printf("Packet: %d transmitted with %d data bytes \n", sendPacket.pktSequenceNumber, sendPacket.count);
-            if(sendto(serverSocketID, &sendPacket,sendPacket.count , 0,
-                        (struct sockaddr * ) &clientAddr, clientAddrLen) < 0 ){
-                perror("Server Send Failed");
-                exit(EXIT_FAILURE);
-            };
+                
+                
+            } else{
+                printf("Packet %d lost \n",sequenceNumberCount );
+                int temptime = timeoutSec ;
+                while(temptime--){
+                    wait(NULL);
+                    // printf("waiting \n");
+                }
+                if(sendto(serverSocketID, &sendPacket,sendPacket.count , 0,
+                            (struct sockaddr * ) &clientAddr, clientAddrLen) < 0 ){
+                    perror("Server Send Failed");
+                    exit(EXIT_FAILURE);
+                };
+            }
+            //TIME START
+            
 
-	        // Ensuring packet recieved, ack same information to Server console
-            // recvFrom 
-             if(recvfrom(serverSocketID,recvBuff, MAX_FILE_NAME, 0,
+            if(recvfrom(serverSocketID,&ack, ackSize, 0,
                             (struct sockaddr * ) &clientAddr, &clientAddrLen) < 0){
                 perror("Server Recvfrom ACK Failed");
                 exit(EXIT_FAILURE);
             }
 
-            printf("%s\n", recvBuff);
+	        // Ensuring packet recieved, ack same information to Server console
+            // recvFrom 
+             
+
+            printf("ACK Number: %d\n",ack.sequenceNum);
             // Clear buffer in case
             memset(sendPacket.data, 0, sizeof sendPacket.data);
         }
