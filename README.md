@@ -14,31 +14,11 @@ In this assignment we are allowed to choose any port number that will not confli
 with exisiting port numbers or ports numbers used by our peers. Additionally, UDP will
 be built with reliable data transfer with sequence numbers + ack numbers.
 
+**Steps For Assignment:** Change to UDP
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-**Steps For Assignment:**
-
-1) Server waits for TCP request from client
+1) Server waits for UDP request from client
 2) Client prompts user for name of file to be transfered
-3) Client establishes TCP connection to server
-4) Client sends filename to server
+3) Client sends name of file to the UDP server
 5) Server reads file and sends it back to the client
 6) Client recieves file and stores it at 'out.txt'
 7) One transfer is complete server and client kill the connection
@@ -52,7 +32,7 @@ be built with reliable data transfer with sequence numbers + ack numbers.
 	- Transmits each line in a seperate packet
 * Client receives packets and puts them into distinct lines in output file
 
-**Data Packet Information:**
+**Data Packet Information:** (Add info on UDP of ack num)
 
 	Count - 2 bytes
 	Packet Sequence Number - 2 bytes
@@ -62,18 +42,38 @@ be built with reliable data transfer with sequence numbers + ack numbers.
 	- Must convert values in fields into network byte order when transmitted
 	- Convert to host byte order when recieved by client
 * Count represents # of chars in packet, ranges from 0-80, 0 means no data
-* Packet Sequence Number is the packet id, incremented by one for each packet
-* When server done transmitting sends EOT packet with count 0 and next seq num
+* Packet Sequence Number is the packet id swapping between 0
+and 1 for alternating bit protocol
+
+**Transmitting Information:**
+* When server done transmitting sends EOT packet with count 0 and next seq num of 0 or 1
 * When client recieves EOT from server closes output file and terminates
 * Filename sent from client will only contain data chars, no new line esc char
 	- When sent count is # of data chars
 	- Packet seq number for filename is 0
+* Sends one packet at a time via
+sendto and receiveffrom
 
-**TCP Connection Information:**
+**ACK Information:**
+* After sending data packet server waits for an ACK from client.
+	- ACK Seq Num - 2 bytes
+* Ack seq number alternates between
+0 and 1
 
-* Two send operations for client, one for header then one for data for each transsmission
-* Same for server two recieve operations, one for header and another for data
-* Can use two buffers for this reason
+**Simulation of Loss: SimulateLoss**
+* SimulateLoss: Loss in server's transmission of data pkt to client
+* Uses _Packet_ _Loss_ _Ratio_ param
+* Creates random number between 0-1
+* rand() < _Packet_ _Loss_ _Ratio_  return 1, else 0
+* Runs before server sends data to client, 1 = transmit, 0 = don't transmit
+
+**Simulation of Loss: SimulateACKLoss**
+* Simulates loss for ACK's
+* Uses _ACK_ _Loss_ _Ratio_ param
+* Creates random number between 0-1
+* rand() < _ACK_ _Loss_ _Ratio_ return 1, else 0
+* Calls before client transmits an ACK to the server, 0 = transmit normally, 1 = ACK Loss
+
 
 
 **Output Information:**
@@ -111,9 +111,9 @@ Before terminating execution - following stats should be printed
 
 **File Descriptions**
 
-* _TCP.h:_ Used to house information shared between two files such as pkt struct and necessary header files
-* _TCPClient.c:_ The client side of the TCP connection.
-* _TCPserver.c:_ The server side of the TCP connection.
+* _UDP.h:_ Houses info shared between two files such as pkt struct, ack struct and necessary header files
+* _UDPClient.c:_ The client side of the UDP connection.
+* _UDPserver.c:_ The server side of the UDP connection.
 * _test.txt:_ The test file used to to create output.txt
 * _Makefile:_ Makefile used to easily compile and remove executables
 
@@ -125,11 +125,11 @@ Since a makefile was created, only one cmd to compile code:
 make all
 
 
-**Running Instructions**
+**Running Instructions** (Add sample tests in here on what to use)
 
 Two executables will be created in the main directory:
-	Server.exec: Takes in no args, runs the server side of the TCP connection
-	Client.exec: Takes in no args, runs the client side of the TCP connection
+	Server.exec: Takes in no args, runs the server side of the UDP connection
+	Client.exec: Takes in no args, runs the client side of the UDP connection
 
 TWO TERMINALS MUST BE RUN AT THE SAME TIME:
 	1) On the first terminal enter "./Server.exec"
