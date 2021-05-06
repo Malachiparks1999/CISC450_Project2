@@ -47,6 +47,11 @@ int main(int argc, char const * argv[]){
     int totalBytes = 0;
     int timeoutSec;
     double packet_loss_ratio;
+    int numRetransPackets = 0;
+    int numDroppedPackets = 0;
+    int totalNumPackets = 0;
+    int numACK = 0;
+    int numTimeoutExpires = 0;
     
      //Name of file client wants server to transmit back
     printf( "Timeout:  ");
@@ -116,17 +121,20 @@ int main(int argc, char const * argv[]){
                     perror("Server Send Failed");
                     exit(EXIT_FAILURE);
                 };
+                totalNumPackets++;
 
                 
                 
             } else{
                 printf("Packet %d lost \n",sequenceNumberCount );
+                 numDroppedPackets++;
                 int temptime = timeoutSec ;
                 while(temptime--){
                     wait(NULL);
                     // printf("waiting \n");
                 }
                 printf("Timeout expired for packet numbered %d\n", sendPacket.pktSequenceNumber);
+                numTimeoutExpires--;
                 printf("Packet %d generated for re-transmission with %d data bytes\n", sendPacket.pktSequenceNumber, sendPacket.count);
                 if(sendto(serverSocketID, &sendPacket,sendPacket.count , 0,
                             (struct sockaddr * ) &clientAddr, clientAddrLen) < 0 ){
@@ -135,7 +143,8 @@ int main(int argc, char const * argv[]){
                 };
             }
              printf("Packet %d successfully  for re-transmission with %d data bytes\n", sendPacket.pktSequenceNumber, sendPacket.count);
-            
+             numRetransPackets++;
+             totalNumPackets++;
             //TIME START
             read_timeout.tv_sec = timeoutSec;    
             read_timeout.tv_usec = pow(10.0,timeoutSec);
@@ -146,6 +155,7 @@ int main(int argc, char const * argv[]){
                             (struct sockaddr * ) &clientAddr, &clientAddrLen) < 0){
                 
                 printf("ACK timeout");
+                numTimeoutExpires--;
                 if(sendto(serverSocketID, &sendPacket,sendPacket.count , 0,
                             (struct sockaddr * ) &clientAddr, clientAddrLen) < 0 ){
                     perror("Server Send Failed");
@@ -158,6 +168,7 @@ int main(int argc, char const * argv[]){
              
 
             printf("ACK %d received\n",ack.sequenceNum);
+            numACK++;
             // Clear buffer in case
             memset(sendPacket.data, 0, sizeof sendPacket.data);
         }
@@ -166,6 +177,8 @@ int main(int argc, char const * argv[]){
     }
 
     // // Final send of information in pkt
+    int finalSeqNum = sequenceNumberCount ; 
+    int finalBytes = totalBytes;
     sequenceNumberCount++;
     sendPacket.pktSequenceNumber = sequenceNumberCount; // this needs to be a VAR 
     sendPacket.count = 0; 
@@ -180,6 +193,14 @@ int main(int argc, char const * argv[]){
 
     printf("End of Transmission Packet with sequence number %d transmitted with %d data bytes \n\n", sequenceNumberCount, sendPacket.count);
     
+    printf("Number of data packets generated for transmission: %d ", finalSeqNum);
+    printf("Total number of data bytes generated for transmission, initial transmission only: %d ", finalBytes );
+    printf("Total number of data packets generated for retransmission: %d ", numRetransPackets );
+    printf("Number of data packets dropped due to loss: %d ", numDroppedPackets );
+    printf("Number of data packets transmitted successfully: %d ", totalNumPackets);
+    printf("Number of ACKs received: %d ", numACK);
+    printf("Count of how many times timeout expired: %d ", numTimeoutExpires);
+
     fclose(fp); // close file
     close(serverSocketID); // close Server connection
 

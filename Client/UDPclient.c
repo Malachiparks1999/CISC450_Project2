@@ -44,6 +44,16 @@ int main(int argc, char const * argv[]){
     int ackSize = sizeof(ack);
     int totalBytes = 0;
 
+    // Used for statistics
+    int totalPktRcv = 0;
+    int totalDupPktRcv = 0;
+    int totalNonDupPktRcv = 0; // use sequence number here
+    int totalDataRcv = 0;
+    int totalAckSentWithoutLoss = 0;
+    int totalAcksGenAndDropped = 0;
+    int totalAcksGen = 0;
+
+
     // Seeding random num generator for AckLoss
     srand(time(NULL));
 
@@ -95,6 +105,8 @@ int main(int argc, char const * argv[]){
             exit(EXIT_FAILURE);
         }
         printf("Packet: %d received with %d data bytes.\n",recvPacket.pktSequenceNumber, recvPacket.count);
+        totalPktRcv++;
+        totalDataRcv++;
 
 	// if file doesn't exist create else write only and append it
         fd = open(outputFile, O_CREAT|O_WRONLY|O_APPEND, S_IRWXU) ;
@@ -125,7 +137,7 @@ int main(int argc, char const * argv[]){
                 exit(EXIT_FAILURE);
                 }
                 printf("Duplicate packet %d received with c data bytes\n",recvPacket.pktSequenceNumber);
-
+                totalDupPktRcv++;
                 if(sendto(clientSocketID , &ack , ackSize , 0 ,
                     (struct sockaddr * )  &serverAddr, serverAddrLen) < 0){
                     perror("Client SendTo ACK Failed");
@@ -152,7 +164,7 @@ int main(int argc, char const * argv[]){
         
    } 
 
-
+    totalNonDupPktRcv = recvPacket.pktSequenceNumber;
     printf("End of Transmission Packet with sequence number %d received with %d data bytes\n", recvPacket.pktSequenceNumber, recvPacket.count);
 
     //close connection between server and host
