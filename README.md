@@ -128,7 +128,7 @@ ACK n lost
 * When the “End of Transmission” packet is received:
 End of Transmission Packet with sequence number n received
 
-**Output of Server After EOT**
+**Server Stats Displayed After EOT**
 
 1. Number of data packets generated for transmission (initial transmission only)
 2. Total number of data bytes generated for transmission, initial transmission only (this should be the sum of the count fields of all packets generated for transmission for the first time only)
@@ -138,7 +138,7 @@ End of Transmission Packet with sequence number n received
 6. Number of ACKs received
 7. Count of how many times timeout expired
 
-**Output of Client After EOT**
+**Client Stats Displayed After EOT**
 1. Total number of data packets received successfully
 2. Number of duplicate data packets received)
 3. Number of data packets received successfully, not including duplicates
@@ -149,6 +149,12 @@ End of Transmission Packet with sequence number n received
 
 
 #########################################################################################################################
+
+**Basic Testing Cases:**
+* Packet and ACK loss rates 0, Timeout value n = 5
+* Packet loss rate 0.2, ACK loss rate 0, Timeout value n = 5.
+* Packet loss rate 0, ACK loss rate 0.2, Timeout value n = 5.
+* Packet loss rate 0.2, ACK loss rate 0, Timeout value n = 4.
 
 **Directory Descriptions**
 
@@ -171,17 +177,26 @@ Since a makefile was created, only one cmd to compile code:
 
 make all
 
-
-**Running Instructions** (Add sample tests in here on what to use)
+**Running Instructions**
 
 Two executables will be created in the main directory:
 	Server.exec: Takes in no args, runs the server side of the UDP connection
 	Client.exec: Takes in no args, runs the client side of the UDP connection
 
 TWO TERMINALS MUST BE RUN AT THE SAME TIME:
-	1) On the first terminal enter "./Server.exec"
-	2) On the second terminal enter "./Client.exec"
-	3) On the client side user will be prompted "Enter a Filename"
-		a) Enter "test.txt" as the file name
-	4) Program will run the create output.txt
-	5) Read output.txt and compare to test.txt located under dir Server
+0. Ensure you have two seperate cmd terminals running
+1. On the first terminal enter "./server.exec"
+2. User will be prompted with "Timeout:"
+	 - Enter a number between 1-10
+3. User will be prompted with "Packet Loss Ratio:", 
+	 - Enter a number between 0-1 inclusive
+4. Swap to the second terminal not in use
+5. On the second terminal enter "./client.exec"
+6. On the client side user will be prompted "Input File Name"
+	 - Enter "test.txt" as the file name without the paraenthesis
+7. On the client side user will be prompted "Ack Loss Ratio"
+	 - Enter a number between 0-1 inclusive
+8. Program will run the create output.txt
+	 - Read output.txt and compare to test.txt located under dir Server
+
+Note: Under extreme tests may get stuck on client side, if so try again until client statistics are printed
