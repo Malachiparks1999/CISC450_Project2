@@ -74,32 +74,79 @@ sendto and receiveffrom
 * rand() < _ACK_ _Loss_ _Ratio_ return 1, else 0
 * Calls before client transmits an ACK to the server, 0 = transmit normally, 1 = ACK Loss
 
+**Client and Server Input Parameters**
+_Client:_ When client starts give following config of params to user
+	- Input File Name: Name of input file sent from the client to server
+	- ACK Loss Ratio: A real num btwn 0-1
+_Server:_ When server starts give following config of params to user
+	- Timeout: User enters int value n btwn 1-10, timeout value is then stored a 10^n microseconds
+	- Packet Loss Ratio: A real num btwn 0-1
 
+**Output of Server before EOT**
 
-**Output Information:**
+* When a data packet numbered n is generated for transmission by the server for the first time:
+Packet n generated for transmission with c data bytes
 
-* When a new data packet numbered n is sent by server:
-	- _Packet_ _n_ _transmitted_ _with_ _c_ _data bytes_
+* When a data packet numbered n is generated for re-transmission by the server:
+Packet n generated for re-transmission with c data bytes
 
-* When a data packet numbered n is recieved by the client
-	- _Packet_ _n_ _received_ _with_ _c_ _data_ _bytes_
+* When a data packet numbered n is actually transmitted by the server:
+Packet n successfully transmitted with c data bytes
 
-* When the "End of Transmission" packet is sent:
-	- _End_ _of_ _Transmission_ _Packet_ _with_ _sequence_ _number_ _n_ _transmitted_ _with_ _c_ _data bytes_
+* When a data packet numbered n is generated, but is dropped because of loss:
+Packet n lost
 
-* When the "End of Transmission" packet is received:
-	- _End_ _of_ _Transmission_ _Packet_ _with_ _sequence_ _number_ _n_ _received_ _with_ _c_ _data_ _bytes_
+* When an ACK is received with number n:
+ACK n received
 
-Before terminating execution - following stats should be printed
-* For Server:
-	-_Number_ _of_ _data_ _packets_ _transmitted_
-	-_Total_ _number_ _of_ _data_ _bytes_ _transmitted_ (_this_ _should_ _be_ _the_
-	-_sum_ _of_ _the_ _count_ _fields_ _of_ _all_ _transmitted_ _packets_. 
+* When a timeout expires:
+Timeout expired for packet numbered n
 
-* For Client:
-	-_Number_ _of_ _data_ _packets_ _transmitted_
-	-_Total_ _number_ _of_ _data_ _bytes_ _received_ (_this_ _should_ _be_ _the_ _sum_
-	_of_ _the_ _count_ _fields_ _of_ _all_ _received_ _packets_.
+* When the “End of Transmission” packet is sent:
+End of Transmission Packet with sequence number n transmitted
+
+**Output of Client before EOT**
+
+* When a data packet numbered n is received by the client for the first time:
+Packet n received with c data bytes
+
+* When a data packet numbered n is received by the client, but is a duplicate packet:
+Duplicate packet n received with c data bytes
+
+* When contents of data packet numbered n are delivered to the user, i.e., are stored in the output file:
+Packet n delivered to user
+
+* When an ACK with number n is generated for transmission:
+ACK n generated for transmission
+
+* When an ACK is actually transmitted with number n:
+ACK n successfully transmitted
+
+* When an ACK is generated, but is dropped because of loss:
+ACK n lost
+
+* When the “End of Transmission” packet is received:
+End of Transmission Packet with sequence number n received
+
+**Output of Server After EOT**
+
+1. Number of data packets generated for transmission (initial transmission only)
+2. Total number of data bytes generated for transmission, initial transmission only (this should be the sum of the count fields of all packets generated for transmission for the first time only)
+3. Total number of data packets generated for retransmission (initial transmissions plus retransmissions)
+4. Number of data packets dropped due to loss
+5. Number of data packets transmitted successfully (initial transmissions plus retransmissions)
+6. Number of ACKs received
+7. Count of how many times timeout expired
+
+**Output of Client After EOT**
+1. Total number of data packets received successfully
+2. Number of duplicate data packets received)
+3. Number of data packets received successfully, not including duplicates
+4. Total number of data bytes received which are delivered to user (this should be the sum of the count fields of all received packets not including duplicates)
+5. Number of ACKs transmitted without loss
+6. Number of ACKs generated but dropped due to loss
+7. Total number of ACKs generated (with and without loss)
+
 
 #########################################################################################################################
 
