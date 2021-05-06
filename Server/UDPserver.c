@@ -134,7 +134,7 @@ int main(int argc, char const * argv[]){
                     // printf("waiting \n");
                 }
                 printf("Timeout expired for packet numbered %d\n", sendPacket.pktSequenceNumber);
-                numTimeoutExpires--;
+                numTimeoutExpires++;
                 printf("Packet %d generated for re-transmission with %d data bytes\n", sendPacket.pktSequenceNumber, sendPacket.count);
                 if(sendto(serverSocketID, &sendPacket,sendPacket.count , 0,
                             (struct sockaddr * ) &clientAddr, clientAddrLen) < 0 ){
@@ -154,8 +154,8 @@ int main(int argc, char const * argv[]){
             while(recvfrom(serverSocketID,&ack, ackSize, 0,
                             (struct sockaddr * ) &clientAddr, &clientAddrLen) < 0){
                 
-                printf("ACK timeoutn\n");
-                numTimeoutExpires--;
+                printf("ACK timeout\n");
+                numTimeoutExpires++;
                 if(sendto(serverSocketID, &sendPacket,sendPacket.count , 0,
                             (struct sockaddr * ) &clientAddr, clientAddrLen) < 0 ){
                     perror("Server Send Failed");
