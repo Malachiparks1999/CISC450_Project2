@@ -154,7 +154,7 @@ int main(int argc, char const * argv[]){
             while(recvfrom(serverSocketID,&ack, ackSize, 0,
                             (struct sockaddr * ) &clientAddr, &clientAddrLen) < 0){
                 
-                printf("ACK timeout");
+                printf("ACK timeoutn\n");
                 numTimeoutExpires--;
                 if(sendto(serverSocketID, &sendPacket,sendPacket.count , 0,
                             (struct sockaddr * ) &clientAddr, clientAddrLen) < 0 ){
@@ -193,13 +193,13 @@ int main(int argc, char const * argv[]){
 
     printf("End of Transmission Packet with sequence number %d transmitted with %d data bytes \n\n", sequenceNumberCount, sendPacket.count);
     
-    printf("Number of data packets generated for transmission: %d ", finalSeqNum);
-    printf("Total number of data bytes generated for transmission, initial transmission only: %d ", finalBytes );
-    printf("Total number of data packets generated for retransmission: %d ", numRetransPackets );
-    printf("Number of data packets dropped due to loss: %d ", numDroppedPackets );
-    printf("Number of data packets transmitted successfully: %d ", totalNumPackets);
-    printf("Number of ACKs received: %d ", numACK);
-    printf("Count of how many times timeout expired: %d ", numTimeoutExpires);
+    printf("Number of data packets generated for transmission: %d \n", finalSeqNum);
+    printf("Total number of data bytes generated for transmission, initial transmission only: %d \n", finalBytes );
+    printf("Total number of data packets generated for retransmission: %d \n", numRetransPackets );
+    printf("Number of data packets dropped due to loss: %d \n", numDroppedPackets );
+    printf("Number of data packets transmitted successfully: %d \n", totalNumPackets);
+    printf("Number of ACKs received: %d \n", numACK);
+    printf("Count of how many times timeout expired: %d \n", numTimeoutExpires);
 
     fclose(fp); // close file
     close(serverSocketID); // close Server connection
