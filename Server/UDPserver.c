@@ -33,14 +33,13 @@ int simulate_loss(double packetLossRate){
 int main(int argc, char const * argv[]){
     struct sockaddr_in serverAddr, clientAddr ;
     struct ack_packet ack;
+    struct timeval read_timeout;
     int ackSize = sizeof(ack);
     ack.sequenceNum = 0;
     socklen_t clientAddrLen = sizeof(clientAddr); 
     int serverSocketID ;
     srand(time(NULL));
     
-
-
     char recvBuff[MAX_FILE_NAME];
     char ackNumber[1];
     char filepath[MAX_FILE_NAME]= "./Server/" ;
@@ -57,7 +56,9 @@ int main(int argc, char const * argv[]){
      //Name of file client wants server to transmit back
     printf( "Timeout:  ");
     fscanf(stdin, "%d", &timeoutSec);
-    timeoutSec = pow(10.0,timeoutSec);
+    
+
+
     fflush(stdin);
     
     // User inputs the packet lost rate
@@ -137,12 +138,20 @@ int main(int argc, char const * argv[]){
                 };
             }
             //TIME START
+            read_timeout.tv_sec = timeoutSec;    
+            read_timeout.tv_usec = pow(10.0,timeoutSec);
+            setsockopt(serverSocketID, SOL_SOCKET, SO_RCVTIMEO, &read_timeout, sizeof read_timeout);
             
 
-            if(recvfrom(serverSocketID,&ack, ackSize, 0,
+            while(recvfrom(serverSocketID,&ack, ackSize, 0,
                             (struct sockaddr * ) &clientAddr, &clientAddrLen) < 0){
-                perror("Server Recvfrom ACK Failed");
-                exit(EXIT_FAILURE);
+                
+                printf("ACK timeout");
+                if(sendto(serverSocketID, &sendPacket,sendPacket.count , 0,
+                            (struct sockaddr * ) &clientAddr, clientAddrLen) < 0 ){
+                    perror("Server Send Failed");
+                    exit(EXIT_FAILURE);
+                };        
             }
 
 	        // Ensuring packet recieved, ack same information to Server console
@@ -158,21 +167,22 @@ int main(int argc, char const * argv[]){
     }
 
     // // Final send of information in pkt
-    // sequenceNumberCount++;
-    // sendPacket.pktSequenceNumber = sequenceNumberCount; // this needs to be a VAR 
-    // sendPacket.count = 0; 
-    // totalBytes += sendPacket.count ;
+    sequenceNumberCount++;
+    sendPacket.pktSequenceNumber = sequenceNumberCount; // this needs to be a VAR 
+    sendPacket.count = 0; 
+    totalBytes += sendPacket.count ;
     
-    // //sendT0
-    // if(send(serverSocketID,&sendPacket, sizeof sendPacket.data + 4, 0) < 0 ){
-    //         perror("Server end of transission Send Failed");
-    //         exit(EXIT_FAILURE);
-    // };
+    //sendT0
+   if(sendto(serverSocketID, &sendPacket,sizeof(sendPacket) , 0,
+                            (struct sockaddr * ) &clientAddr, clientAddrLen) < 0 ){
+                    perror("Server Send Failed");
+                    exit(EXIT_FAILURE);
+    };
 
-    // printf("End of Transmission Packet with sequence number %d transmitted with %d data bytes \n\n", sequenceNumberCount, sendPacket.count);
+    printf("End of Transmission Packet with sequence number %d transmitted with %d data bytes \n\n", sequenceNumberCount, sendPacket.count);
 
-    // printf("Number of data packets transmitted: %d \n", sequenceNumberCount);
-    // printf("Total number of data bytes transmitted: %d\n", totalBytes) ;
+    printf("Number of data packets transmitted: %d \n", sequenceNumberCount);
+    printf("Total number of data bytes transmitted: %d\n", totalBytes) ;
     
     fclose(fp); // close file
     close(serverSocketID); // close Server connection

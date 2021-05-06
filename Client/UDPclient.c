@@ -49,7 +49,7 @@ int main(int argc, char const * argv[]){
 
     //used for packet lost
     int lostPkts = 0;
-    double packet_loss_rate;
+    double ack_loss_rate;
 
     
     //Name of file client wants server to transmit back
@@ -60,7 +60,7 @@ int main(int argc, char const * argv[]){
     fflush(stdin);
     // User inputs the packet lost rate
     printf("ACK Loss Ratio:");
-    fscanf(stdin, "%lf", &packet_loss_rate);
+    fscanf(stdin, "%lf", &ack_loss_rate);
     
   
 
@@ -105,13 +105,30 @@ int main(int argc, char const * argv[]){
 
         //wait for server to send whole file 
         //sendTO
-        if(sendto(clientSocketID , &ack , ackSize , 0 ,
-                (struct sockaddr * )  &serverAddr, serverAddrLen) < 0){
-            perror("Client SendTo ACK Failed");
-            exit(EXIT_FAILURE);
-        };
+        if(simulate_ACK_loss(ack_loss_rate)){
+                printf("ACK Sequence Number: %d \n", ack.sequenceNum);
+                if(sendto(clientSocketID , &ack , ackSize , 0 ,
+                    (struct sockaddr * )  &serverAddr, serverAddrLen) < 0){
+                    perror("Client SendTo ACK Failed");
+                    exit(EXIT_FAILURE);
+                };
 
+            } else{
+               if(recvfrom(clientSocketID,&recvPacket, MAX_FILE_NAME, 0,
+                        (struct sockaddr *) &serverAddr, &serverAddrLen) < 0){
+                perror("Client RecvFrom Failed");
+                exit(EXIT_FAILURE);
+                }
+                
+                if(sendto(clientSocketID , &ack , ackSize , 0 ,
+                    (struct sockaddr * )  &serverAddr, serverAddrLen) < 0){
+                    perror("Client SendTo ACK Failed");
+                    exit(EXIT_FAILURE);
+                };
+            }
         
+
+
 
         if(ack.sequenceNum == 0)
             ack.sequenceNum = 1;
