@@ -48,7 +48,6 @@ int main(int argc, char const * argv[]){
     int totalPktRcv = 0;
     int totalDupPktRcv = 0;
     int totalNonDupPktRcv = 0; // use sequence number here
-    int totalDataRcv = 0;
     int totalAckSentWithoutLoss = 0;
     int totalAcksGenAndDropped = 0;
     int totalAcksGen = 0;
@@ -106,7 +105,6 @@ int main(int argc, char const * argv[]){
         }
         printf("Packet: %d received with %d data bytes.\n",recvPacket.pktSequenceNumber, recvPacket.count);
         totalPktRcv++;
-        totalDataRcv++;
 
 	// if file doesn't exist create else write only and append it
         fd = open(outputFile, O_CREAT|O_WRONLY|O_APPEND, S_IRWXU) ;
@@ -120,16 +118,18 @@ int main(int argc, char const * argv[]){
         //wait for server to send whole file 
         //sendTO
         printf("ACK %d generated for transmission\n", ack.sequenceNum);
+        totalAcksGen++;
         if(simulate_ACK_loss(ack_loss_rate)){
                 
-                if(sendto(clientSocketID , &ack , ackSize , 0 ,
-                    (struct sockaddr * )  &serverAddr, serverAddrLen) < 0){
-                    perror("Client SendTo ACK Failed");
-                    exit(EXIT_FAILURE);
-                };
+            if(sendto(clientSocketID , &ack , ackSize , 0 ,
+                (struct sockaddr * )  &serverAddr, serverAddrLen) < 0){
+                perror("Client SendTo ACK Failed");
+                exit(EXIT_FAILURE);
+            };
 
             } else{
                 printf("ACK %d lost\n", ack.sequenceNum);
+                totalAcksGenAndDropped++;
                 
                if(recvfrom(clientSocketID,&recvPacket, MAX_FILE_NAME, 0,
                         (struct sockaddr *) &serverAddr, &serverAddrLen) < 0){
@@ -145,6 +145,7 @@ int main(int argc, char const * argv[]){
                 };
             }
             printf("ACK %d successfully transmitted\n", ack.sequenceNum);
+            totalAckSentWithoutLoss++;
         
 
 
@@ -165,7 +166,16 @@ int main(int argc, char const * argv[]){
    } 
 
     totalNonDupPktRcv = recvPacket.pktSequenceNumber;
-    printf("End of Transmission Packet with sequence number %d received with %d data bytes\n", recvPacket.pktSequenceNumber, recvPacket.count);
+    printf("End of Transmission Packet with sequence number %d received with %d data bytes\n\n", recvPacket.pktSequenceNumber, recvPacket.count);
+
+    // printing statistics
+    printf("Total number of data packets received successfully: %d\n",totalPktRcv);
+    printf("Number of duplicate data packets received: %d\n", totalDupPktRcv);
+    printf("Number of data packets received successfully, not including duplicates: %d\n", totalNonDupPktRcv);
+    printf("Total number of data bytes received which are delivered to user: %d\n", totalBytes);
+    printf("Number of ACKs transmitted without loss: %d\n", totalAckSentWithoutLoss);
+    printf("Number of ACKs generated but dropped due to loss: %d\n", totalAcksGenAndDropped);
+    printf("Total number of ACKs generated (with and without loss): %d\n", totalAcksGen);
 
     //close connection between server and host
     close(fd);

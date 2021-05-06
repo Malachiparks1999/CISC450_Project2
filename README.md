@@ -105,8 +105,8 @@ Before terminating execution - following stats should be printed
 
 **Directory Descriptions**
 
-* _Server:_ Used to house all server files such as test.txt and the TCPServer.c file
-* _Client:_ Used to house all Client files such as TCPClient.c
+* _Server:_ Used to house all server files such as test.txt and the UDPServer.c file
+* _Client:_ Used to house all Client files such as UDPClient.c
 
 
 **File Descriptions**

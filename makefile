@@ -5,7 +5,7 @@ CLIENT = Client/UDPclient
 all: $(SERVER).exec $(CLIENT).exec
 
 $(SERVER).exec: $(SERVER).c makefile
-	gcc -o server.exec $(SERVER).c
+	gcc -o server.exec $(SERVER).c -lm
 
 $(CLIENT).exec: $(CLIENT).c makefile
 	gcc -o client.exec $(CLIENT).c 
