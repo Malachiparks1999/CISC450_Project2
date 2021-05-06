@@ -1,4 +1,4 @@
-# cisc450_project1
+# cisc450_project2
 
 Due Date: 	May 7th, 2021
 Creators:	Casey Rock & Malachi Parks
@@ -14,7 +14,8 @@ In this assignment we are allowed to choose any port number that will not confli
 with exisiting port numbers or ports numbers used by our peers. Additionally, UDP will
 be built with reliable data transfer with sequence numbers + ack numbers.
 
-**Steps For Assignment:** Change to UDP
+
+**Steps For Assignment:**
 
 1) Server waits for UDP request from client
 2) Client prompts user for name of file to be transfered
@@ -32,6 +33,7 @@ be built with reliable data transfer with sequence numbers + ack numbers.
 	- Transmits each line in a seperate packet
 * Client receives packets and puts them into distinct lines in output file
 
+
 **Data Packet Information:** (Add info on UDP of ack num)
 
 	Count - 2 bytes
@@ -45,6 +47,7 @@ be built with reliable data transfer with sequence numbers + ack numbers.
 * Packet Sequence Number is the packet id swapping between 0
 and 1 for alternating bit protocol
 
+
 **Transmitting Information:**
 * When server done transmitting sends EOT packet with count 0 and next seq num of 0 or 1
 * When client recieves EOT from server closes output file and terminates
@@ -54,33 +57,42 @@ and 1 for alternating bit protocol
 * Sends one packet at a time via
 sendto and receiveffrom
 
+
 **ACK Information:**
 * After sending data packet server waits for an ACK from client.
 	- ACK Seq Num - 2 bytes
 * Ack seq number alternates between
 0 and 1
 
+
 **Simulation of Loss: SimulateLoss**
+
 * SimulateLoss: Loss in server's transmission of data pkt to client
 * Uses _Packet_ _Loss_ _Ratio_ param
 * Creates random number between 0-1
 * rand() < _Packet_ _Loss_ _Ratio_  return 1, else 0
 * Runs before server sends data to client, 1 = transmit, 0 = don't transmit
 
+
 **Simulation of Loss: SimulateACKLoss**
+
 * Simulates loss for ACK's
 * Uses _ACK_ _Loss_ _Ratio_ param
 * Creates random number between 0-1
 * rand() < _ACK_ _Loss_ _Ratio_ return 1, else 0
 * Calls before client transmits an ACK to the server, 0 = transmit normally, 1 = ACK Loss
 
+
 **Client and Server Input Parameters**
+
 _Client:_ When client starts give following config of params to user
 	- Input File Name: Name of input file sent from the client to server
 	- ACK Loss Ratio: A real num btwn 0-1
+
 _Server:_ When server starts give following config of params to user
 	- Timeout: User enters int value n btwn 1-10, timeout value is then stored a 10^n microseconds
 	- Packet Loss Ratio: A real num btwn 0-1
+
 
 **Output of Server before EOT**
 
@@ -105,6 +117,7 @@ Timeout expired for packet numbered n
 * When the “End of Transmission” packet is sent:
 End of Transmission Packet with sequence number n transmitted
 
+
 **Output of Client before EOT**
 
 * When a data packet numbered n is received by the client for the first time:
@@ -128,6 +141,7 @@ ACK n lost
 * When the “End of Transmission” packet is received:
 End of Transmission Packet with sequence number n received
 
+
 **Server Stats Displayed After EOT**
 
 1. Number of data packets generated for transmission (initial transmission only)
@@ -148,13 +162,14 @@ End of Transmission Packet with sequence number n received
 7. Total number of ACKs generated (with and without loss)
 
 
-#########################################################################################################################
+###############################################################################################################
 
 **Basic Testing Cases:**
 * Packet and ACK loss rates 0, Timeout value n = 5
 * Packet loss rate 0.2, ACK loss rate 0, Timeout value n = 5.
 * Packet loss rate 0, ACK loss rate 0.2, Timeout value n = 5.
 * Packet loss rate 0.2, ACK loss rate 0, Timeout value n = 4.
+
 
 **Directory Descriptions**
 
@@ -176,6 +191,7 @@ End of Transmission Packet with sequence number n received
 Since a makefile was created, only one cmd to compile code:
 
 make all
+
 
 **Running Instructions**
 
