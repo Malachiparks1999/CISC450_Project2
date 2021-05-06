@@ -47,17 +47,20 @@ int main(int argc, char const * argv[]){
     int lostPkts = 0;
     double packet_loss_rate;
 
-    // User inputs the packet lost rate
-    printf("Please enter the Packet Loss Rate. This number must between 0 and 1. Ex: .73\n");
-    fscanf(stdin, "%lf", &packet_loss_rate);
-    fflush(stdin);
-  
-
+    
     //Name of file client wants server to transmit back
-    printf( "Enter a file name : ");
+    printf( "Input File Name:  ");
     fgets(filename, MAX_FILE_NAME, stdin);
     len = strlen(filename);
     filename[len - 1] = '\0';
+    fflush(stdin);
+    // User inputs the packet lost rate
+    printf("ACK Loss Ratio:");
+    fscanf(stdin, "%lf", &packet_loss_rate);
+    
+  
+
+    
 
 
     //Establishes connection

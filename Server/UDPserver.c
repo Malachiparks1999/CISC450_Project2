@@ -44,9 +44,17 @@ int main(int argc, char const * argv[]){
     int totalBytes = 0;
     char ack[MESSMAX];
     int recvMesgSize;
+    int timeoutSec;
+    double packet_loss_ratio;
     
+     //Name of file client wants server to transmit back
+    printf( "Timeout:  ");
+    fscanf(stdin, "%d", &timeoutSec);
+    fflush(stdin);
     
-    
+    // User inputs the packet lost rate
+    printf("Packet Loss Ratio: ");
+    fscanf(stdin, "%lf", &packet_loss_ratio);
 
     
     // Create a socket, if failed exit with failure
