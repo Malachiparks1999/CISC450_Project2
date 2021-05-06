@@ -200,6 +200,7 @@ Two executables will be created in the main directory:
 	Client.exec: Takes in no args, runs the client side of the UDP connection
 
 TWO TERMINALS MUST BE RUN AT THE SAME TIME:
+
 0. Ensure you have two seperate cmd terminals running
 1. On the first terminal enter "./server.exec"
 2. User will be prompted with "Timeout:"
