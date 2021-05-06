@@ -28,6 +28,7 @@ int simulate_loss(double PKTLossRate){
     }
 }//simulate_loss
 
+
 int main(int argc, char const * argv[]){
     struct sockaddr_in serverAddr;
     socklen_t serverAddrLen = sizeof(serverAddr);
@@ -48,13 +49,9 @@ int main(int argc, char const * argv[]){
 
     // User inputs the packet lost rate
     printf("Please enter the Packet Loss Rate. This number must between 0 and 1. Ex: .73\n");
-    scanf("%lf",&packet_loss_rate);
-    
-    /* cant get this to work correctly to ensure it's a float between the two values
-    while(packet_loss_rate >= 1 || packet_loss_rate =< 0){
-	printf("Entry invalid: Number was not between 0 and 1. Try Again\n");
-    }
-    */
+    fscanf(stdin, "%lf", &packet_loss_rate);
+    fflush(stdin);
+  
 
     //Name of file client wants server to transmit back
     printf( "Enter a file name : ");
