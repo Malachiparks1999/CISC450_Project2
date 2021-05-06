@@ -94,19 +94,22 @@ int main(int argc, char const * argv[]){
             perror("Client RecvFrom Failed");
             exit(EXIT_FAILURE);
         }
+        printf("Packet: %d received with %d data bytes.\n",recvPacket.pktSequenceNumber, recvPacket.count);
 
 	// if file doesn't exist create else write only and append it
         fd = open(outputFile, O_CREAT|O_WRONLY|O_APPEND, S_IRWXU) ;
         write(fd, recvPacket.data, strlen(recvPacket.data));
+        printf("Packet %d delivered to user\n",recvPacket.pktSequenceNumber);
 
 	// Track number  of packet and amount of data sent with each
-        printf("Packet: %d received with %d data bytes.\n",recvPacket.pktSequenceNumber, recvPacket.count);
+        
         totalBytes += recvPacket.count ;
 
         //wait for server to send whole file 
         //sendTO
+        printf("ACK %d generated for transmission\n", ack.sequenceNum);
         if(simulate_ACK_loss(ack_loss_rate)){
-                printf("ACK Sequence Number: %d \n", ack.sequenceNum);
+                
                 if(sendto(clientSocketID , &ack , ackSize , 0 ,
                     (struct sockaddr * )  &serverAddr, serverAddrLen) < 0){
                     perror("Client SendTo ACK Failed");
@@ -114,18 +117,22 @@ int main(int argc, char const * argv[]){
                 };
 
             } else{
+                printf("ACK %d lost\n", ack.sequenceNum);
+                
                if(recvfrom(clientSocketID,&recvPacket, MAX_FILE_NAME, 0,
                         (struct sockaddr *) &serverAddr, &serverAddrLen) < 0){
                 perror("Client RecvFrom Failed");
                 exit(EXIT_FAILURE);
                 }
-                
+                printf("Duplicate packet %d received with c data bytes\n",recvPacket.pktSequenceNumber);
+
                 if(sendto(clientSocketID , &ack , ackSize , 0 ,
                     (struct sockaddr * )  &serverAddr, serverAddrLen) < 0){
                     perror("Client SendTo ACK Failed");
                     exit(EXIT_FAILURE);
                 };
             }
+            printf("ACK %d successfully transmitted\n", ack.sequenceNum);
         
 
 
@@ -145,18 +152,8 @@ int main(int argc, char const * argv[]){
         
    } 
 
-//    // Recieve end of file, break immediatly
-//    //RecvFrom
-//    if(recv(clientSocketID,&endFile, MAX_FILE_NAME, 0 ) < 0){
-//             perror("Server Accept Failed");
-//             exit(EXIT_FAILURE);
-//     }
 
-//     printf("End of Transmission Packet with sequence number %d received with %d data bytes\n", recvPacket.pktSequenceNumber, recvPacket.count);
-
-//     printf("\nNumber of data packets received: %d \n", recvPacket.pktSequenceNumber);
-//     printf("Total number of data bytes received: %d \n", totalBytes);
-   
+    printf("End of Transmission Packet with sequence number %d received with %d data bytes\n", recvPacket.pktSequenceNumber, recvPacket.count);
 
     //close connection between server and host
     close(fd);

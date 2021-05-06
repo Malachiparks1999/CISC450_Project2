@@ -21,7 +21,6 @@ int simulate_loss(double packetLossRate){
 	*/
      
 	double packetSuccessRate = ((double) rand()  / (RAND_MAX));
-    printf("potential lost:%lf \n", packetSuccessRate) ;
 	if(packetSuccessRate > packetLossRate){
 		return 1; //transmit 
     }
@@ -39,17 +38,13 @@ int main(int argc, char const * argv[]){
     socklen_t clientAddrLen = sizeof(clientAddr); 
     int serverSocketID ;
     srand(time(NULL));
-    
     char recvBuff[MAX_FILE_NAME];
-    char ackNumber[1];
     char filepath[MAX_FILE_NAME]= "./Server/" ;
     FILE *fp ;
-    char fileBuffer[MESSMAX];
     struct packet sendPacket;
     struct packet final ;
     int sequenceNumberCount = 0;
     int totalBytes = 0;
-    int recvMesgSize;
     int timeoutSec;
     double packet_loss_ratio;
     
@@ -115,7 +110,7 @@ int main(int argc, char const * argv[]){
             totalBytes += sendPacket.count ;
             
             if(simulate_loss(packet_loss_ratio)){
-                printf("Packet: %d transmitted with %d data bytes \n", sendPacket.pktSequenceNumber, sendPacket.count);
+                printf("Packet %d generated for transmission with %d data bytes\n", sendPacket.pktSequenceNumber, sendPacket.count);
                 if(sendto(serverSocketID, &sendPacket,sendPacket.count , 0,
                             (struct sockaddr * ) &clientAddr, clientAddrLen) < 0 ){
                     perror("Server Send Failed");
@@ -131,12 +126,16 @@ int main(int argc, char const * argv[]){
                     wait(NULL);
                     // printf("waiting \n");
                 }
+                printf("Timeout expired for packet numbered %d\n", sendPacket.pktSequenceNumber);
+                printf("Packet %d generated for re-transmission with %d data bytes\n", sendPacket.pktSequenceNumber, sendPacket.count);
                 if(sendto(serverSocketID, &sendPacket,sendPacket.count , 0,
                             (struct sockaddr * ) &clientAddr, clientAddrLen) < 0 ){
                     perror("Server Send Failed");
                     exit(EXIT_FAILURE);
                 };
             }
+             printf("Packet %d successfully  for re-transmission with %d data bytes\n", sendPacket.pktSequenceNumber, sendPacket.count);
+            
             //TIME START
             read_timeout.tv_sec = timeoutSec;    
             read_timeout.tv_usec = pow(10.0,timeoutSec);
@@ -158,12 +157,12 @@ int main(int argc, char const * argv[]){
             // recvFrom 
              
 
-            printf("ACK Number: %d\n",ack.sequenceNum);
+            printf("ACK %d received\n",ack.sequenceNum);
             // Clear buffer in case
             memset(sendPacket.data, 0, sizeof sendPacket.data);
         }
     }else{
-        printf("File does not exist");
+        printf("File does not exist\n");
     }
 
     // // Final send of information in pkt
@@ -180,9 +179,6 @@ int main(int argc, char const * argv[]){
     };
 
     printf("End of Transmission Packet with sequence number %d transmitted with %d data bytes \n\n", sequenceNumberCount, sendPacket.count);
-
-    printf("Number of data packets transmitted: %d \n", sequenceNumberCount);
-    printf("Total number of data bytes transmitted: %d\n", totalBytes) ;
     
     fclose(fp); // close file
     close(serverSocketID); // close Server connection
